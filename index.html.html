@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>肥婆生日快乐🎂</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root{
+      --text:#3b2352; --muted:#7a6a8d; --line:rgba(168,85,247,.14);
+      --pink:#ec4899; --violet2:#c084fc; --white:rgba(255,255,255,.86);
+    }
+    body{
+      margin:0;font-family:"Segoe UI",Arial,sans-serif;min-height:100vh;
+      background:radial-gradient(circle at top,#f5d0fe 0%,#fff7fb 26%,#faf5ff 58%,#f8fafc 100%);
+      color:var(--text);text-align:center;overflow-x:hidden;
+    }
+    .container{width:min(100%,500px);margin:0 auto;padding:18px 16px 38px;}
+    .card{
+      background:var(--white);border:1px solid var(--line);border-radius:28px;padding:18px;
+      box-shadow:0 18px 45px rgba(168,85,247,.12);backdrop-filter:blur(10px);margin-bottom:16px;
+    }
+    .badge,.pill,.mode-pill,.tag,.answer-chip{
+      display:inline-block;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.86);
+      border:1px solid var(--line);color:#6b4b86;font-size:13px;box-shadow:0 6px 16px rgba(168,85,247,.06);
+    }
+    .badge{padding:8px 14px;background:linear-gradient(180deg,#fff,#f7ebff);color:#6b21a8;font-weight:700;margin-bottom:12px;}
+    h1{margin:0;font-size:30px;font-weight:900;line-height:1.2;color:#4a155d;}
+    h2{margin:0 0 10px;font-size:28px;color:#4a155d;}
+    .sub{margin-top:10px;color:var(--muted);font-size:14px;line-height:1.6;}
+    .small{color:var(--muted);font-size:13px;font-weight:600;}
+    .big-text{font-size:26px;line-height:1.35;font-weight:900;color:#4a155d;margin-top:8px;}
+    .status-row,.mode-row,.history,.answer-list{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;}
+    input{
+      width:100%;padding:14px;border-radius:16px;border:1px solid rgba(168,85,247,.18);background:rgba(255,255,255,.97);
+      color:var(--text);font-size:15px;outline:none;margin:12px 0;box-shadow: inset 0 1px 2px rgba(124,58,237,.04);
+    }
+    input::placeholder{color:#b09ac8;}
+    button{
+      border:none;border-radius:999px;padding:13px 22px;font-size:16px;font-weight:800;cursor:pointer;color:#fff;
+      background:linear-gradient(135deg,var(--pink),var(--violet2));box-shadow:0 14px 28px rgba(192,132,252,.28);transition:.15s ease;
+    }
+    button:hover{transform:translateY(-1px);}
+    button:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+    .question{font-size:18px;line-height:1.5;font-weight:800;color:#52216d;margin:8px 0 10px;}
+    .wheel-wrap{
+      position:relative;width:min(100%,390px);aspect-ratio:1/1;margin:10px auto 0;border-radius:50%;padding:10px;
+      background:radial-gradient(circle, rgba(236,72,153,.10), rgba(192,132,252,.06), transparent 72%);
+    }
+    .glow{
+      position:absolute;inset:-18px;border-radius:50%;
+      background:radial-gradient(circle, rgba(236,72,153,.18), transparent 70%);filter:blur(30px);
+    }
+    canvas{
+      width:100%;height:100%;border-radius:50%;position:relative;z-index:1;background:rgba(255,255,255,.82);
+      box-shadow:0 20px 45px rgba(124,58,237,.10), 0 0 20px rgba(236,72,153,.08);
+      transition:transform 4.4s cubic-bezier(.16,1,.3,1);
+    }
+    .pointer{
+      position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;z-index:3;
+      border-left:18px solid transparent;border-right:18px solid transparent;border-top:34px solid #f472b6;
+      filter:drop-shadow(0 6px 14px rgba(244,114,182,.35));
+    }
+    .pointer::after{
+      content:"";position:absolute;left:-7px;top:-36px;width:14px;height:14px;border-radius:50%;background:#fff;
+      box-shadow:0 4px 10px rgba(168,85,247,.25);
+    }
+    .result-box{margin-top:14px;padding:16px;border-radius:20px;background:rgba(255,255,255,.78);border:1px solid var(--line);}
+    .label{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#a78bfa;font-weight:700;}
+    .sparkle{position:fixed;width:8px;height:8px;border-radius:999px;pointer-events:none;}
+    #gateScreen{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;z-index:999;
+      background:radial-gradient(circle at top, #f5d0fe 0%, #faf5ff 35%, #fff 100%);
+    }
+    .gate-card{
+      width:min(100%,430px);background:rgba(255,255,255,.84);border:1px solid rgba(168,85,247,.14);border-radius:28px;
+      padding:24px 18px;box-shadow:0 24px 60px rgba(124,58,237,.14);backdrop-filter:blur(12px);color:var(--text);
+    }
+    .gate-card p{color:#67577c;line-height:1.7;margin-bottom:18px;}
+    @media (max-width:430px){h1{font-size:26px;}h2{font-size:25px;}.big-text{font-size:22px;}}
+  </style>
+</head>
+<body>
+  <div id="gateScreen">
+    <div class="gate-card">
+      <div class="badge">🎁 寿星专属</div>
+      <h2>肥婆生日快乐 💖</h2>
+      <p>
+        因为今年主要的礼物还没有送到，<br>
+        所以准备了这个转盘小游戏来弥补一下 🙁<br>
+        先答对题目拿机会，看看是奖励…还是我要“惩罚”你 😎
+      </p>
+      <button onclick="startApp()">开启生日惊喜</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="badge">🎂 寿星专属</div>
+      <h1>肥婆生日快乐!!</h1>
+      <div class="sub" id="rotatingText">每答对一题，就离生日惊喜更近一点</div>
+      <div class="status-row">
+        <div class="pill">🎡 抽奖次数：<span id="chanceText">0</span></div>
+        <div class="pill">✅ 已答对：<span id="correctText">0</span></div>
+      </div>
+      <div class="mode-row">
+        <div class="mode-pill">🎁 奖励盘 70%</div>
+        <div class="mode-pill">😈 惩罚盘 30%</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="small">先答对问题，才能获得生日抽奖机会</div>
+      <div class="question" id="questionText">题目载入中...</div>
+      <input id="answerInput" type="text" placeholder="输入你的答案..." />
+      <button id="submitAnswerBtn" onclick="submitAnswer()">提交答案</button>
+      <div class="sub" id="answerFeedback">答对 1 题 = 1 次抽奖机会</div>
+      <div class="answer-list" id="guessedAnswersBox"></div>
+    </div>
+
+    <div class="card">
+      <div class="wheel-wrap">
+        <div class="glow" id="wheelGlow"></div>
+        <div class="pointer"></div>
+        <canvas id="wheel" width="420" height="420"></canvas>
+      </div>
+      <div style="margin-top:20px">
+        <button id="spinBtn" onclick="spin()">开启生日抽奖</button>
+      </div>
+      <div class="result-box">
+        <div class="label" id="resultLabel">Birthday Result</div>
+        <div class="big-text" id="resultText">先答题拿次数，再来抽生日奖励 ✨</div>
+        <div class="sub" id="resultSub">本活动仅限寿星本人使用 👑</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;color:#4a155d;">最近结果</div>
+      <div class="history" id="historyBox"></div>
+    </div>
+  </div>
+
+  <script>
+    const rotatingLines = [
+      "每答对一题，就离生日惊喜更近一点。",
+      "今天的好运，应该都属于你寿星本人。"
+    ];
+
+    const questions = [
+      {
+        type: "single",
+        question: "我平时最常叫你什么？",
+        answers: ["肥婆", "fei po", "feipo", "死肥婆", "girl", "老婆"]
+      },
+      {
+        type: "multi",
+        question: "猜猜我送你什么？每答对一个，+1 抽奖次数（最多 3 次）",
+        answers: ["Jellycat", "手表powerbank", "powerbank", "anya", "anya gk", "anya 模型", "针织"],
+        guessed: [],
+        max: 3
+      }
+    ];
+
+    const prizeItems = [
+      "再抽一次 🔁","午餐一个月 🍱","金饰 charm / 耳环 💍","RM200 礼物任选 🛍️",
+      "现金 RM300 💰","USS 门票 🎢","MacBook Air 50% 折扣 💻","MacBook Air 75% 折扣💻"
+    ];
+    const punishmentItems = [
+      "每星期陪我跑步一次，持续 1 个月 🏃","陪我打羽毛球 1 个月 🏸","帮我按摩 10 分钟 💆","帮我抓痒 10 分钟 🤭",
+      "1 个月不可以喝奶茶 🧋"
+    ];
+    const prizePalette = ["#fb7185","#f59e0b","#22c55e","#38bdf8","#818cf8","#a855f7","#ec4899","#14b8a6"];
+    const punishmentPalette = ["#ef4444","#f97316","#eab308","#84cc16","#06b6d4","#3b82f6","#8b5cf6","#ec4899"];
+
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const questionText = document.getElementById("questionText");
+    const answerInput = document.getElementById("answerInput");
+    const answerFeedback = document.getElementById("answerFeedback");
+    const chanceText = document.getElementById("chanceText");
+    const correctText = document.getElementById("correctText");
+    const resultLabel = document.getElementById("resultLabel");
+    const resultText = document.getElementById("resultText");
+    const resultSub = document.getElementById("resultSub");
+    const historyBox = document.getElementById("historyBox");
+    const spinBtn = document.getElementById("spinBtn");
+    const submitAnswerBtn = document.getElementById("submitAnswerBtn");
+    const wheelGlow = document.getElementById("wheelGlow");
+    const guessedAnswersBox = document.getElementById("guessedAnswersBox");
+
+    let currentQuestionIndex = 0;
+    let chances = 0;
+    let correctCount = 0;
+    let historyList = [];
+    let rotation = 0;
+    let spinning = false;
+    let bonusPrizeBoost = false;
+    let drawnGrandPrizes = [];
+
+    function startApp() {
+      document.getElementById("gateScreen").style.display = "none";
+    }
+    function normalize(text) {
+      return text.toLowerCase().trim().replace(/\s+/g, "");
+    }
+    function updateStatus() {
+      chanceText.textContent = chances;
+      correctText.textContent = correctCount;
+    }
+    function updateGuessedAnswers() {
+      guessedAnswersBox.innerHTML = "";
+      const current = questions[currentQuestionIndex];
+      if (!current || current.type !== "multi") return;
+
+      const progress = document.createElement("div");
+      progress.className = "small";
+      progress.textContent = `已猜中 ${current.guessed.length}/${current.max}`;
+      guessedAnswersBox.appendChild(progress);
+
+      if (!current.guessed.length) {
+        const span = document.createElement("span");
+        span.className = "small";
+        span.textContent = "还没猜中任何礼物";
+        guessedAnswersBox.appendChild(span);
+        return;
+      }
+      current.guessed.forEach(item => {
+        const chip = document.createElement("div");
+        chip.className = "answer-chip";
+        chip.textContent = "猜中：" + item;
+        guessedAnswersBox.appendChild(chip);
+      });
+    }
+    function loadQuestion() {
+      guessedAnswersBox.innerHTML = "";
+      if (currentQuestionIndex >= questions.length) {
+        questionText.textContent = "你已经答完全部问题啦，可以开始抽双转盘了 🎂";
+        answerInput.style.display = "none";
+        submitAnswerBtn.style.display = "none";
+        answerFeedback.textContent = "全部答完，快去看看会抽到奖励还是惩罚 😏";
+        return;
+      }
+      const current = questions[currentQuestionIndex];
+      questionText.textContent = current.question;
+      answerInput.value = "";
+      if (current.type === "multi") {
+        answerFeedback.textContent = `这题可以连续猜，每猜中一个没猜过的答案，就 +1 次，最多 ${current.max} 次。`;
+        updateGuessedAnswers();
+      } else {
+        answerFeedback.textContent = "答对 1 题 = 1 次抽奖机会";
+      }
+    }
+    function submitAnswer() {
+      if (currentQuestionIndex >= questions.length) return;
+      const userAnswer = normalize(answerInput.value);
+      if (!userAnswer) {
+        answerFeedback.textContent = "先输入答案再提交哦。";
+        return;
+      }
+      const current = questions[currentQuestionIndex];
+
+      if (current.type === "single") {
+        const ok = current.answers.some(ans => normalize(ans) === userAnswer);
+        if (ok) {
+          chances++; correctCount++; updateStatus();
+          answerFeedback.textContent = "答对了！获得 1 次生日抽奖机会 💖";
+          currentQuestionIndex++;
+          setTimeout(loadQuestion, 700);
+        } else {
+          answerFeedback.textContent = "还不对，再想想 😏";
+        }
+        return;
+      }
+
+      if (current.type === "multi") {
+        if (current.guessed.length >= current.max) {
+          answerFeedback.textContent = `这题已经拿满 ${current.max} 次抽奖机会啦 🎉`;
+          currentQuestionIndex++;
+          setTimeout(loadQuestion, 700);
+          return;
+        }
+        const matched = current.answers.find(ans => normalize(ans) === userAnswer);
+        if (!matched) {
+          answerFeedback.textContent = "这次没猜中，再想想我还准备了什么 😏";
+          return;
+        }
+        const alreadyGuessed = current.guessed.some(ans => normalize(ans) === userAnswer);
+        if (alreadyGuessed) {
+          answerFeedback.textContent = "这个你已经猜中过了，换一个试试看 😎";
+          return;
+        }
+        current.guessed.push(matched);
+        chances++; correctCount++; updateStatus(); updateGuessedAnswers();
+        answerInput.value = "";
+
+        if (current.guessed.length >= current.max) {
+          answerFeedback.textContent = `猜中了「${matched}」！这是第 ${current.max} 次机会，已经拿满啦 🎉`;
+
+          resultLabel.textContent = "Special Bonus";
+          resultText.textContent = `🎆 你已经拿满 ${current.max} 次抽奖机会！`;
+          resultSub.textContent = "寿星 bonus 已启动，下一抽更容易出大奖 👑";
+
+          bonusPrizeBoost = true;
+          burstConfetti("prize");
+
+          currentQuestionIndex++;
+          setTimeout(loadQuestion, 1200);
+        } else {
+          answerFeedback.textContent = `猜中了「${matched}」！+1 抽奖次数，目前 ${current.guessed.length}/${current.max} 💖`;
+        }
+      }
+    }
+
+    function drawWrappedText(text, x, y) {
+      const maxLength = 10;
+      const displayText = text.length > 20 ? text.slice(0, 20) + "…" : text;
+      if (displayText.length <= maxLength) {
+        ctx.fillText(displayText, x, y);
+      } else {
+        const line1 = displayText.slice(0, maxLength);
+        const line2 = displayText.slice(maxLength);
+        ctx.fillText(line1, x, y - 10);
+        ctx.fillText(line2, x, y + 10);
+      }
+    }
+    function drawWheel(items, palette, mode) {
+      const cx = 210, cy = 210, r = 195;
+      const anglePer = Math.PI * 2 / items.length;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 202, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.88)";
+      ctx.fill();
+
+      for (let i = 0; i < items.length; i++) {
+        const start = i * anglePer, end = start + anglePer;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r - 12, start, end); ctx.closePath();
+        ctx.fillStyle = palette[i % palette.length]; ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.72)"; ctx.lineWidth = 1.5; ctx.stroke();
+
+        ctx.save();
+        ctx.translate(cx, cy); ctx.rotate(start + anglePer / 2);
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "white"; ctx.font = "bold 15px Segoe UI";
+        drawWrappedText(items[i], 118, 0);
+        ctx.restore();
+      }
+
+      ctx.beginPath(); ctx.arc(cx, cy, 42, 0, Math.PI * 2);
+      const grd = ctx.createLinearGradient(150, 150, 260, 260);
+      grd.addColorStop(0, mode === "punishment" ? "#fecaca" : "#fde68a");
+      grd.addColorStop(0.5, mode === "punishment" ? "#fca5a5" : "#f9a8d4");
+      grd.addColorStop(1, mode === "punishment" ? "#f87171" : "#c4b5fd");
+      ctx.fillStyle = grd; ctx.fill();
+
+      ctx.beginPath(); ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.28)"; ctx.fill();
+
+      ctx.font = "24px serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "white";
+      ctx.fillText(mode === "punishment" ? "😈" : "🎁", cx, cy + 1);
+
+      wheelGlow.style.background = mode === "punishment"
+        ? "radial-gradient(circle, rgba(239,68,68,0.20), transparent 70%)"
+        : "radial-gradient(circle, rgba(236,72,153,0.18), transparent 70%)";
+    }
+    function updateHistory() {
+      historyBox.innerHTML = "";
+      if (!historyList.length) {
+        const span = document.createElement("span");
+        span.className = "small";
+        span.textContent = "还没抽到结果";
+        historyBox.appendChild(span);
+        return;
+      }
+      historyList.forEach(item => {
+        const tag = document.createElement("div");
+        tag.className = "tag";
+        tag.textContent = item;
+        historyBox.appendChild(tag);
+      });
+    }
+    function burstConfetti(mode) {
+      for (let i = 0; i < 18; i++) {
+        const dot = document.createElement("div");
+        dot.className = "sparkle";
+        dot.style.left = "50%"; dot.style.top = "42%";
+        dot.style.background = mode === "punishment" ? "#fda4af" : "#f9a8d4";
+        document.body.appendChild(dot);
+
+        const x = (Math.random() - 0.5) * 260;
+        const y = (Math.random() - 0.5) * 220;
+        const animation = dot.animate([
+          { transform: "translate(0,0) scale(1)", opacity: 1 },
+          { transform: `translate(${x}px, ${y}px) scale(0.7)`, opacity: 0 }
+        ], { duration: 1200, easing: "ease-out" });
+        animation.onfinish = () => dot.remove();
+      }
+    }
+    function spin() {
+      if (spinning) return;
+      if (chances <= 0) {
+        resultLabel.textContent = "Birthday Result";
+        resultText.textContent = "先答对问题，拿到抽奖次数再来 🎂";
+        resultSub.textContent = "答对题目或猜中礼物，才有机会抽奖";
+        return;
+      }
+      spinning = true; chances--; updateStatus(); spinBtn.disabled = true;
+
+      const isPunishment = Math.random() < 0.3;
+      const availablePrizeItems = prizeItems.filter(item => !drawnGrandPrizes.includes(item));
+      const currentItems = isPunishment ? punishmentItems : availablePrizeItems;
+      const currentPalette = isPunishment ? punishmentPalette : prizePalette;
+      const mode = isPunishment ? "punishment" : "prize";
+
+      resultLabel.textContent = isPunishment ? "Punishment Wheel" : "Reward Wheel";
+      resultText.textContent = isPunishment ? "糟了，正在进入惩罚转盘 😈" : "正在为寿星转动生日奖励...";
+      resultSub.textContent = isPunishment ? "生日模式：小小代价换乐趣 😏" : "生日奖励开奖中 ✨";
+
+      drawWheel(currentItems, currentPalette, mode);
+
+      const count = currentItems.length;
+      const segmentDeg = 360 / count;
+      let nextIndex;
+
+      if (!isPunishment && bonusPrizeBoost) {
+        let boostedPool = currentItems
+          .map((item, index) => ({ item, index }))
+          .filter(({ item }) =>
+            item.includes("现金 RM300") ||
+            item.includes("USS 门票") ||
+            item.includes("MacBook Air 50% 折扣") ||
+            item.includes("MacBook Air 75% 折扣")
+          )
+          .map(({ index }) => index);
+
+        if (!boostedPool.length) {
+          nextIndex = Math.floor(Math.random() * currentItems.length);
+        } else {
+          nextIndex = boostedPool[Math.floor(Math.random() * boostedPool.length)];
+        }
+
+        bonusPrizeBoost = false;
+      } else {
+        nextIndex = Math.floor(Math.random() * currentItems.length);
+      }
+      const fullTurns = 6 + Math.floor(Math.random() * 3);
+      const target = 360 - (nextIndex * segmentDeg + segmentDeg / 2);
+
+      rotation += fullTurns * 360 + target + 360;
+      canvas.style.transform = `rotate(${rotation}deg)`;
+
+      setTimeout(() => {
+        const chosen = currentItems[nextIndex];
+        historyList = [(isPunishment ? "😈 " : "🎁 ") + chosen, ...historyList].slice(0, 5);
+        updateHistory();
+
+        if (isPunishment) {
+          resultLabel.textContent = "Punishment Result";
+          resultText.textContent = "😈 惩罚内容：" + chosen;
+          resultSub.textContent = "寿星已抽中，不能赖哦 🤭";
+        } else {
+          resultLabel.textContent = "Reward Result";
+          resultText.textContent = "🎁 生日奖励：" + chosen;
+          if (
+            chosen.includes("MacBook Air 50% 折扣") ||
+            chosen.includes("MacBook Air 75% 折扣")
+          ) {
+            if (!drawnGrandPrizes.includes(chosen)) {
+              drawnGrandPrizes.push(chosen);
+            }
+            resultSub.textContent = "这个大奖已经锁定，之后不会再重复抽到 👑";
+          } else if (chosen.includes("再抽一次")) {
+            chances++; updateStatus();
+            resultSub.textContent = "寿星获得额外一次抽奖机会 👑";
+          } else {
+            resultSub.textContent = "已记录，生日后兑现 💖";
+          }
+        }
+        burstConfetti(mode);
+        spinning = false; spinBtn.disabled = false;
+      }, 4400);
+    }
+
+    setInterval(() => {
+      const el = document.getElementById("rotatingText");
+      const current = rotatingLines.indexOf(el.textContent);
+      el.textContent = rotatingLines[(current + 1) % rotatingLines.length];
+    }, 2800);
+
+    drawWheel(prizeItems, prizePalette, "prize");
+    loadQuestion();
+    updateStatus();
+    updateHistory();
+    answerInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") submitAnswer();
+    });
+  </script>
+</body>
+</html>
