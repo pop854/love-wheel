@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>给你的礼物转盘 💖</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #4c1d95, #190b2e 40%, #09090b 85%);
+    color: white;
+    text-align: center;
+    overflow-x: hidden;
+  }
+  .container {
+    width: min(100%, 420px);
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+  }
+  .sub {
+    margin: 10px 0 24px;
+    color: rgba(255,255,255,0.75);
+    font-size: 14px;
+    min-height: 20px;
+  }
+  .wheel-wrap {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 0 auto;
+  }
+  canvas {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45), 0 0 40px rgba(255,255,255,0.1);
+    transition: transform 4.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(255,255,255,0.04);
+  }
+  .glow {
+    position: absolute;
+    inset: -18px;
+    border-radius: 50%;
+    background: rgba(217,70,239,0.18);
+    filter: blur(28px);
+    z-index: 0;
+  }
+  .pointer {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 34px solid #f9a8d4;
+    filter: drop-shadow(0 6px 14px rgba(255,192,203,0.55));
+    z-index: 3;
+  }
+  .pointer::after {
+    content: "";
+    position: absolute;
+    left: -7px;
+    top: -36px;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(255,255,255,0.5);
+  }
+  button {
+    margin-top: 26px;
+    padding: 14px 26px;
+    border: none;
+    border-radius: 999px;
+    font-size: 17px;
+    font-weight: 800;
+    background: white;
+    color: #c026d3;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    cursor: pointer;
+  }
+  button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  .card {
+    margin-top: 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  }
+  .label {
+    font-size: 12px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+  .result {
+    font-size: 28px;
+    font-weight: 900;
+    margin-top: 8px;
+  }
+  textarea {
+    margin-top: 10px;
+    width: 100%;
+    min-height: 170px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(0,0,0,0.22);
+    color: white;
+    padding: 14px;
+    font-size: 14px;
+    outline: none;
+    resize: vertical;
+  }
+  .small-btn {
+    width: 100%;
+    margin-top: 12px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #fb7185, #d946ef, #8b5cf6);
+    color: white;
+    font-size: 15px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+  }
+  .history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: center;
+  }
+  .tag {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.22);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 14px;
+  }
+  .sparkle {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: white;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">💖 给女友的浪漫礼物转盘 ✨</div>
+    <h1>Lucky Love Wheel</h1>
+    <div class="sub" id="subText">今天的幸运，都留给你。</div>
+
+    <div class="wheel-wrap">
+      <div class="glow"></div>
+      <div class="pointer"></div>
+      <canvas id="wheel" width="320" height="320"></canvas>
+    </div>
+
+    <button id="spinBtn" onclick="spin()">开始抽礼物</button>
+
+    <div class="card">
+      <div class="label">RESULT</div>
+      <div class="result" id="result">还没开始，先宠她一下吧 ✨</div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">自定义礼物</div>
+      <textarea id="prizeInput">奶茶一杯
+抱抱 10 分钟
+晚餐我请
+口红一支
+惊喜红包
+电影约会
+零食大礼包
+神秘礼物</textarea>
+      <button class="small-btn" onclick="updatePrizes()">更新转盘内容</button>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700;">最近抽到</div>
+      <div class="history" id="history"></div>
+    </div>
+  </div>
+
+<script>
+const romanticLines = [
+  "今天的幸运，都留给你。",
+  "抽中的不是礼物，是我对你的偏爱。",
+  "每一格都是想哄你开心。",
+  "转到哪里，都会是小惊喜。"
+];
+
+let prizes = [
+  "奶茶一杯",
+  "抱抱 10 分钟",
+  "晚餐我请",
+  "口红一支",
+  "惊喜红包",
+  "电影约会",
+  "零食大礼包",
+  "神秘礼物"
+];
+
+const palette = [
+  "#fb7185", "#f59e0b", "#22c55e", "#38bdf8",
+  "#818cf8", "#a855f7", "#ec4899", "#14b8a6",
+  "#eab308", "#f97316", "#10b981", "#8b5cf6"
+];
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const resultEl = document.getElementById("result");
+const historyEl = document.getElementById("history");
+const spinBtn = document.getElementById("spinBtn");
+
+let rotation = 0;
+let spinning = false;
+let historyList = [];
+
+function drawWheel() {
+  const cx = 160, cy = 160, r = 150;
+  const anglePer = Math.PI * 2 / prizes.length;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 156, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  ctx.fill();
+
+  for (let i = 0; i < prizes.length; i++) {
+    const start = i * anglePer;
+    const end = start + anglePer;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r - 10, start, end);
+    ctx.closePath();
+    ctx.fillStyle = palette[i % palette.length];
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + anglePer / 2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "white";
+    ctx.font = "bold 14px Segoe UI";
+    let text = prizes[i];
+    if (text.length > 7) text = text.slice(0, 7) + "…";
+    ctx.fillText(text, 95, 0);
+    ctx.restore();
+  }
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 34, 0, Math.PI * 2);
+  const grd = ctx.createLinearGradient(120, 120, 200, 200);
+  grd.addColorStop(0, "#fde68a");
+  grd.addColorStop(0.5, "#f9a8d4");
+  grd.addColorStop(1, "#c4b5fd");
+  ctx.fillStyle = grd;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 24, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255,255,255,0.18)";
+  ctx.fill();
+
+  ctx.font = "22px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "white";
+  ctx.fillText("🎁", cx, cy + 1);
+}
+
+function updateHistory() {
+  historyEl.innerHTML = "";
+  if (!historyList.length) {
+    const span = document.createElement("span");
+    span.style.opacity = "0.6";
+    span.textContent = "抽完后会显示最近 5 次结果";
+    historyEl.appendChild(span);
+    return;
+  }
+
+  historyList.forEach(item => {
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = item;
+    historyEl.appendChild(tag);
+  });
+}
+
+function updatePrizes() {
+  const value = document.getElementById("prizeInput").value;
+  const cleaned = value.split("\n").map(v => v.trim()).filter(Boolean).slice(0, 12);
+  if (cleaned.length < 4) {
+    alert("至少放 4 个礼物，转盘才会比较好看哦");
+    return;
+  }
+  prizes = cleaned;
+  resultEl.textContent = "礼物内容已更新 ✨";
+  historyList = [];
+  updateHistory();
+  drawWheel();
+}
+
+function burstConfetti() {
+  for (let i = 0; i < 18; i++) {
+    const dot = document.createElement("div");
+    dot.className = "sparkle";
+    dot.style.left = "50%";
+    dot.style.top = "42%";
+    document.body.appendChild(dot);
+
+    const x = (Math.random() - 0.5) * 260;
+    const y = (Math.random() - 0.5) * 220;
+
+    const animation = dot.animate([
+      { transform: "translate(0,0) scale(1)", opacity: 1 },
+      { transform: `translate(${x}px, ${y}px) scale(0.7)`, opacity: 0 }
+    ], {
+      duration: 1200,
+      easing: "ease-out"
+    });
+
+    animation.onfinish = () => dot.remove();
+  }
+}
+
+function spin() {
+  if (spinning) return;
+  spinning = true;
+  spinBtn.disabled = true;
+  resultEl.textContent = "正在为她转动惊喜...";
+  const count = prizes.length;
+  const segmentDeg = 360 / count;
+  const nextIndex = Math.floor(Math.random() * count);
+  const fullTurns = 6 + Math.floor(Math.random() * 3);
+  const target = 360 - (nextIndex * segmentDeg + segmentDeg / 2);
+  rotation += fullTurns * 360 + target + 360;
+
+  canvas.style.transform = `rotate(${rotation}deg)`;
+
+  setTimeout(() => {
+    const chosen = prizes[nextIndex];
+    resultEl.textContent = "🎁 抽到：" + chosen;
+    historyList = [chosen, ...historyList].slice(0, 5);
+    updateHistory();
+    burstConfetti();
+    spinning = false;
+    spinBtn.disabled = false;
+  }, 4400);
+}
+
+setInterval(() => {
+  const el = document.getElementById("subText");
+  const current = romanticLines.indexOf(el.textContent);
+  el.textContent = romanticLines[(current + 1) % romanticLines.length];
+}, 2800);
+
+drawWheel();
+updateHistory();
+</script>
+</body>
+</html>
